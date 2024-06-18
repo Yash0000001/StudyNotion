@@ -11,5 +11,8 @@ export default defineConfig(({ command, mode }) => {
       __APP_ENV__: JSON.stringify(env.APP_ENV),
     },
     plugins: [react()],
+    server:{
+      port:3000,
+    }
   }
 })

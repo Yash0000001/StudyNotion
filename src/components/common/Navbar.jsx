@@ -5,26 +5,42 @@ import { NavbarLinks } from "../../data/navbar-links";
 import { useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { AiOutlineShoppingCart } from "react-icons/ai";
-import { setTotalItems } from "../../slices/cartSlice";
+// import { setTotalItems } from "../../slices/cartSlice";
 import { ProfileDropDown } from "../core/Auth/ProfileDropDown";
 import { categories } from "../../Services/apis";
 import { useState } from "react";
 import { useEffect } from "react";
+import { IoIosArrowDropdownCircle } from "react-icons/io";
+import { apiConnector } from "../../Services/apiConnector";
+
+// const subLinks = [
+//   {
+//     title: "python",
+//     link: "/catalog/python",
+//   },
+//   {
+//     title: "web dev",
+//     link: "/catalog/web-development",
+//   },
+// ];
+
 export const Navbar = () => {
   const { token } = useSelector((state) => state.auth);
   const { user } = useSelector((state) => state.profile);
   const { totalItems } = useSelector((state) => state.cart);
   const location = useLocation();
-  const { subLinks, setSubLinks } = useState([]);
+  const [ subLinks, setSubLinks ] = useState([]);
+  
 
   const fetchSublinks = async () => {
     try {
       const result = await apiConnector("GET", categories.CATEGORIES_API);
-      console.log("Printing sublinks result:", result);
-      setSubLinks(result.data.data);
-      
+      // console.log("Printing sublinks result:", result);  
+      setSubLinks(result.data.allCategory);
+      console.log(result.data.allCategory);
+
     } catch (error) {
-      console.log("Could not fetch the category list");
+      console.log(error);
     }
   };
   useEffect(() => {
@@ -47,7 +63,33 @@ export const Navbar = () => {
             {NavbarLinks.map((link, index) => (
               <li key={index}>
                 {link.title === "Catalog" ? (
-                  <div></div>
+                  <div className="flex items-center gap-2 group relative cursor-pointer">
+                    <p>{link.title}</p>
+                    <IoIosArrowDropdownCircle />
+
+                    <div
+                      className="invisible absolute left-[50%] top-[50%]
+                    translate-x-[-50%] translate-y-[80%]
+                    flex flex-col rounded-md bg-richblack-5 p-4 text-richblack-900
+                    opacity-0 transition-all duration-200 group-hover:visible
+                    group-hover:opacity-100 lg:w-[300px] "
+                    >
+                      <div
+                        className="absolute left-[50%] top-0 h-6 w-6 rotate-45 rounded
+                    bg-richblack-5 translate-y-[-45%] translate-x-[80%]"
+                      ></div>
+
+                      {subLinks?.length ? (
+                        subLinks.map((sublink, index) => {
+                          <Link to={`/catalog/${sublink.name.split(" ").join("-").toLowerCase()}`} className="rounded-lg bg-transparent py-4 pl-4 hover:bg-richblack-50" key={index}>
+                            <p>{sublink.name}</p>
+                          </Link>;
+                        })
+                      ) : (
+                        <div></div>
+                      )}
+                    </div>
+                  </div>
                 ) : (
                   <Link to={link?.path}>
                     <p
